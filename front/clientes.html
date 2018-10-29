@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Integrare - Clientes</title>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+	<script src="js/jquery.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+
+</head>
+<body>
+	<!-- Top Nav -->
+	<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+	  <a class="navbar-brand" href="#">Integrare</a>
+	  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+	    <span class="navbar-toggler-icon"></span>
+	  </button>
+	  <div class="collapse navbar-collapse" id="navbarColor01">
+	    <ul class="navbar-nav mr-auto">
+	      <li class="nav-item">
+	        <a class="nav-link" href="clientes.html">Clientes</a>
+	      </li>
+	      <li class="nav-item">
+	        <a class="nav-link" href="produtos.html">Produtos</a>
+	      </li>
+	      <li class="nav-item dropdown">
+		    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="true">Vendas</a>
+		    <div class="dropdown-menu" x-placement="bottom-start">
+		      <a class="dropdown-item" href="vendas.html">Lista</a>
+		      <a class="dropdown-item" href="add-venda.html">Adicionar</a>
+		    </div>
+		  </li>
+	    </ul>
+	  </div>
+	</nav>
+	<!-- Fim Top Nav -->
+
+	<div class="container">
+	<!-- Lista -->
+		<br/>
+		<div class="row">
+			<div class="col-md-1">
+				<h3>Clientes</h3>
+			</div>
+			<div class="col-md-2">
+				<button type="button" class="btn btn-success btn-sm" onclick="$('#form_modal').css('display','block'); $('#btn_salvar').attr('onclick', 'insert()'); $('input').val('');">+Novo</button>
+			</div>
+		</div>
+		<table class="table table-hover table-striped">
+		  <thead>
+		    <tr>
+		      <th scope="col">ID</th>
+		      <th scope="col">CLIENTE</th>
+		      <th scope="col">E-MAIL</th>
+		      <th scope="col">AÇÕES</th>
+		    </tr>
+		  </thead>
+		  <tbody id="list">
+		
+		</tbody>
+		</table>
+	<!-- Fim Lista -->
+
+	<!-- Modal -->
+	<div class="modal" id="form_modal">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title"><b>Cliente</b></h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#form_modal').css('display','none')">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	      	<form>
+	      		<input type="hidden" id="id">
+		        <div class="col-md-10">
+		        	<div class="form-group">
+			        	<span>Nome</span>
+			        	<input type="text" class="form-control required" id="name" />
+			        </div>
+		        </div>
+		        <div class="col-md-10">
+		        	<div class="form-group">
+			        	<span>E-mail</span>
+			        	<input type="email" class="form-control required" id="email" />
+			        </div>
+		        </div>
+		        <div class="col-md-12">
+		        	<div class="form-group">
+			        	<span>Endereço</span>
+			        	<input type="text" class="form-control required" id="address" />
+			        </div>
+		        </div>
+		    </form>
+
+		    <!-- Popup Validaçao -->
+		    <div class="col-md-12">
+				<div class="alert alert-dismissible alert-danger" id="erro_validacao"  style="display: none;">
+				  <button type="button" class="close" onclick="$('.alert-danger').css('display','none');">&times;</button>
+				  <strong class="title_validacao">Atenção!</strong><br/>
+				  <span class="text_validacao"></span>
+				</div>
+			</div>
+			<!-- Fim Popup Validaçao -->
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-primary" id="btn_salvar" onclick="insert()">Salvar</button>
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="$('#form_modal').css('display','none')">Fechar</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	<!-- Fim Modal -->
+	</div>
+
+	<!-- Popup Validaçao -->
+    <div class="col-md-12">
+		<div class="alert alert-dismissible alert-danger" id="erro_retorno" style="position: fixed; bottom: 0; width: 100%; display: none;">
+		  <button type="button" class="close" onclick="$('.alert-danger').css('display','none');">&times;</button>
+		  <strong class="title_erro">Atenção!</strong><br/>
+		  <span class="text_erro"></span>
+		</div>
+	</div>
+	<!-- Fim Popup Validaçao -->
+
+	<!-- Popup sucesso -->
+	<div class="alert alert-dismissible alert-success" id="alert_sucesso" style="position: fixed; bottom: 0; width: 100%; display: none;">
+	  <strong>Acão executada com sucesso!</strong>
+	</div>
+	<!-- Fim Popup sucesso -->
+
+	<script type="text/javascript">
+		
+		var urlApi = "http://localhost:8000/api/clients";
+
+		$(document).ready(function(){
+			list();
+		});
+
+		function list(){
+
+			$.ajax({
+	         	url : urlApi,
+	         	type : 'GET',
+	     		success: function(retorno){
+	     			
+	     			$("#list").html("");
+
+	     			$.each(retorno.data, function(){
+	     				$("#list").append(
+	     					'<tr>'+
+						      '<th>'+this.id+'</th>'+
+						      '<td>'+this.name+'</td>'+
+						      '<td>'+this.email+'</td>'+
+						      '<td>'+
+						      	'<button class="btn btn-secondary btn-sm" onclick="getEdit('+this.id+')" >Editar</button> '+
+								'<button class="btn btn-danger btn-sm" onclick="del('+this.id+')" >Excluir</button>'+
+						      '</td>'+
+						    '</tr>'
+	     				);
+	     			});
+
+	     		},
+	     		error: function(erro){
+	     			popupErro(erro);
+	     		}
+	         
+			});
+
+		}
+
+		function insert(){
+
+			if(validaForm()){
+				return false;
+			}
+
+			$('#form_modal').css('display','none');
+
+			$.ajax({
+	         	url : urlApi,
+	         	type : 'POST',
+	         	contentType: 'application/json',
+	         	dataType: 'json',
+	         	data: JSON.stringify({
+	         		"name": $("#name").val(),
+	         		"email": $("#email").val(),
+	         		"address": $("#address").val()
+	         	}),
+
+	     		success: function(retorno){
+	     			
+	     			$("input").val("");
+	     			$("#alert_sucesso").fadeIn(500);
+	     			setTimeout(function(){
+	     				$("#alert_sucesso").fadeOut(500);
+	     			}, 3000);
+	     			list();
+	     		},
+	     		error: function(erro){
+	     			popupErro(erro);
+	     			list();
+	     		}
+	         
+			});
+
+		}
+
+
+		function getEdit(id){
+
+			$.ajax({
+	         	url : urlApi+"/"+id,
+	         	type : 'GET',
+	         	contentType: 'application/json',
+	     		success: function(retorno){
+	     			$.each(retorno, function(){
+	     				$.each(this, function(key, value){
+	     					$("#"+key).val(value);
+	     				});
+	     			});
+	     			$("#btn_salvar").attr("onclick", "edit()");
+	     			$('#form_modal').css('display','block');
+	     		},
+	     		error: function(erro){
+	     			popupErro(erro);
+	     			list();
+	     		}
+	         
+			});
+
+		}
+
+
+		function edit(){
+
+			if(validaForm()){
+				return false;
+			}
+
+			$('#form_modal').css('display','none');
+
+			$.ajax({
+	         	url : urlApi+"/"+$("#id").val(),
+	         	type : 'PUT',
+	         	contentType: 'application/json',
+	         	dataType: 'json',
+	         	data: JSON.stringify({
+	         		"name": $("#name").val(),
+	         		"email": $("#email").val(),
+	         		"address": $("#address").val()
+	         	}),
+
+	     		success: function(retorno){
+	     			
+	     			$("input").val("");
+	     			$("#alert_sucesso").fadeIn(500);
+	     			setTimeout(function(){
+	     				$("#alert_sucesso").fadeOut(500);
+	     			}, 3000);
+	     			list();
+	     		},
+	     		error: function(erro){
+	     			popupErro(erro);
+	     			list();
+	     		}
+	         
+			});
+
+		}
+
+		function del(id){
+
+			if(confirm("Deseja realmente excluir")){
+			
+				$.ajax({
+		         	url : urlApi+"/"+id,
+		         	type : 'DELETE',
+		         	contentType: 'application/json',
+		     		success: function(retorno){
+		     			$("#alert_sucesso").fadeIn(500);
+		     			setTimeout(function(){
+		     				$("#alert_sucesso").fadeOut(500);
+		     			}, 3000);
+		     			list();
+		     		},
+		     		error: function(erro){
+		     			popupErro(erro);
+		     			list();
+		     		}
+		         
+				});
+
+			}
+
+		}
+
+
+		function validaForm(){
+
+			var erro = false;
+			var strErro = "";
+
+			$("input").each(function(){
+
+				if($(this).hasClass("required") && $(this).val() == ""){
+					erro = true;
+					strErro += "O campo "+$(this).prev().html()+" é obrigatório!<br/>";
+				}
+
+			});
+
+
+			if(erro){
+				$(".title_validacao").html("Atenção!");
+				$(".text_validacao").html(strErro);
+				$("#erro_validacao").css("display","block");
+			}else{
+				$("#erro_validacao").css("display","none");
+			}
+
+			
+			return erro;
+
+		}
+
+
+		function popupErro(erro){
+			$(".title_erro").html("Erro: "+erro.status);
+			$(".text_erro").html(erro.statusText);
+			$("#erro_retorno").css("display","block");
+		}
+
+	</script>
+</body>
+</html>

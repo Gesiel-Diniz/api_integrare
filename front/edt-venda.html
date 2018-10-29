@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Integrare - Vendas</title>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+	<script src="js/jquery.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+
+</head>
+<body>
+	<!-- Top Nav -->
+	<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+	  <a class="navbar-brand" href="#">Integrare</a>
+	  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+	    <span class="navbar-toggler-icon"></span>
+	  </button>
+	  <div class="collapse navbar-collapse" id="navbarColor01">
+	    <ul class="navbar-nav mr-auto">
+	      <li class="nav-item">
+	        <a class="nav-link" href="clientes.html">Clientes</a>
+	      </li>
+	      <li class="nav-item">
+	        <a class="nav-link" href="produtos.html">Produtos</a>
+	      </li>
+	      <li class="nav-item dropdown">
+		    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="true">Vendas</a>
+		    <div class="dropdown-menu" x-placement="bottom-start">
+		      <a class="dropdown-item" href="vendas.html">Lista</a>
+		      <a class="dropdown-item" href="add-venda.html">Adicionar</a>
+		    </div>
+		  </li>
+	    </ul>
+	  </div>
+	</nav>
+	<!-- Fim Top Nav -->
+
+	<div class="container">
+		
+		<div>
+			<fieldset>
+	    		<legend>Venda</legend>
+				<form>
+		      		<input type="hidden" id="id">
+		      		<div class="row">
+				        <div class="col-md-4">
+				        	<div class="form-group">
+					        	<span>Cliente</span>
+					        	<select class="form-control required" disabled="" id="client_id">
+					        	</select>
+					        </div>
+				        </div>
+				        <div class="col-md-4">
+				        	<div class="form-group">
+					        	<span>Produto</span>
+					        	<select class="form-control required" id="produtos" onchange="abreProduto(this.id)">
+					        		<option value="">Selecione</option>
+					        	</select>
+					        </div>
+				        </div>
+				        <div class="col-md-4">
+				        	<span>Produtos selecionados</span>
+				        	<div id="lista_produtos" class="form-control" style="height:400px; overflow-y: scroll;" >
+				        		
+				        	</div>
+				        </div>
+			        </div>
+			        <div class="row">
+				        <div class="col-md-4">
+				        	<button type="button" class="btn btn-primary" id="btn_salvar" onclick="insert()">Salvar</button>
+				        </div>
+				    </div>
+			    </form>
+			</fieldset>
+		</div>
+
+	<!-- Modal -->
+	<div class="modal" id="form_modal">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title"><b>Venda</b></h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="$('#form_modal').css('display','none')">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	      	<form>
+	      		<input type="hidden" id="id">
+	      		<div class="row">
+			        <div class="col-md-7">
+			        	<div class="form-group">
+				        	<span>Produto</span>
+				        	<input type="text" class="form-control required" readonly="" id="nome_produto" />
+				        	<input type="hidden" id="product" value="" />
+				        </div>
+			        </div>
+			        <div class="col-md-5">
+			        	<div class="form-group">
+				        	<span>Data</span>
+				        	<input type="date" class="form-control required" id="data" />
+				        </div>
+			        </div>
+		        </div>
+		        <div class="row">
+		        	<div class="col-md-4">
+			        	<div class="form-group">
+				        	<span>Quantidade</span>
+				        	<input type="number" class="form-control required calula" id="quantidade" />
+				        </div>
+			        </div>
+			        <div class="col-md-4">
+			        	<div class="form-group">
+				        	<span>Valor unitário</span>
+				        	<input type="text" class="form-control required calula" id="preco" />
+				        </div>
+			        </div>
+			        <div class="col-md-4">
+			        	<div class="form-group">
+				        	<span>Total</span>
+				        	<input type="text" class="form-control required calula" readonly="" id="totali" />
+				        </div>
+			        </div>
+			        
+		        </div>
+		    </form>
+
+		    <!-- Popup Validaçao -->
+		    <div class="col-md-12">
+				<div class="alert alert-dismissible alert-danger" id="erro_validacao"  style="display: none;">
+				  <button type="button" class="close" onclick="$('.alert-danger').css('display','none');">&times;</button>
+				  <strong class="title_validacao">Atenção!</strong><br/>
+				  <span class="text_validacao"></span>
+				</div>
+			</div>
+			<!-- Fim Popup Validaçao -->
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-primary" id="btn_salvar" onclick="salvaProduto()">Salvar</button>
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="$('#form_modal').css('display','none')">Fechar</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	<!-- Fim Modal -->
+	</div>
+
+	<!-- Popup Validaçao -->
+    <div class="col-md-12">
+		<div class="alert alert-dismissible alert-danger" id="erro_retorno" style="position: fixed; bottom: 0; width: 100%; display: none;">
+		  <button type="button" class="close" onclick="$('.alert-danger').css('display','none');">&times;</button>
+		  <strong class="title_erro">Atenção!</strong><br/>
+		  <span class="text_erro"></span>
+		</div>
+	</div>
+	<!-- Fim Popup Validaçao -->
+
+	<!-- Popup sucesso -->
+	<div class="alert alert-dismissible alert-success" id="alert_sucesso" style="position: fixed; bottom: 0; width: 100%; display: none;">
+	  <strong>Acão executada com sucesso!</strong>
+	</div>
+	<!-- Fim Popup sucesso -->
+
+	<script type="text/javascript">
+		
+		var urlApi = "http://localhost:8000/api/vendas";
+		var urlApiClients = "http://localhost:8000/api/clients";
+		var urlApiProducts = "http://localhost:8000/api/products";
+
+		var qtd = 0;
+
+		$(document).ready(function(){
+			listProducts();
+			getEdit(window.location.href.split("?")[1].split("=")[1]);
+		});
+
+
+
+		function salvaProduto(){
+
+			if(validaForm()){
+				return false;
+			}
+
+			qtd++;
+
+			$("#lista_produtos").prepend(
+				'<div class="alert alert-dismissible alert-success" id="item-'+qtd+'">'+
+  					'<button type="button" class="close btn" onclick="confirma(this)">Excluir</button>'+
+  					'<span type="hidden" id="product_id-'+qtd+'">'+$("#produtos option:selected").val()+'</span> - '+
+  					'<strong>'+$("#produtos option:selected").text()+'</strong><br/>'+
+  					'Quantidade: <span id="quantity-'+qtd+'">'+$("#quantidade").val()+'</span><br/>'+
+  					'Valor: R$ <span id="unit_price-'+qtd+'">'+$("#preco").val()+'</span><br/>'+
+  					'Total: <span id="total-'+qtd+'">'+$("#totali").val()+'</span><br/>'+
+  					'Data: <span id="date-'+qtd+'">'+$("#data").val()+'</span>'+
+				'</div>'
+			);
+
+			$('#form_modal').css('display','none');
+
+		}
+
+
+		function abreProduto(id){
+
+			$("input").val("");
+			$("#nome_produto").val($("#produtos option:selected").text());
+			$("#product_id").val($("#produtos option:selected").val());
+			$('#form_modal').css('display','block');
+
+		}
+
+
+		$(".calula").keyup(function(){
+			$("#totali").val("R$ "+parseFloat($("#quantidade").val())*parseFloat($("#preco").val()))
+		});
+		$(".calula").change(function(){
+			$("#totali").val("R$ "+parseFloat($("#quantidade").val())*parseFloat($("#preco").val()))
+		});
+
+		function listProducts(){
+
+			$.ajax({
+	         	url : urlApiProducts,
+	         	type : 'GET',
+	     		success: function(retorno){
+	     			$("#produtos").html("");
+	     			$("#produtos").append("<option value=''>Selecione</option>");
+	     			$.each(retorno.data, function(){
+	     				$("#produtos").append("<option value='"+this.id+"'>"+this.name+"</option>");
+	     			});
+
+	     		},
+	     		error: function(erro){
+	     			popupErro(erro);
+	     		}
+	         
+			});
+
+		}
+
+		function insert(){
+
+			if(validaForm()){
+				return false;
+			}
+
+			var strJson = '';
+			var strJsonTotal = '';
+
+			$("#lista_produtos").find(">").each(function(){
+
+				strJson = "";
+
+				$(this).find(">").each(function(){
+
+					if($(this).attr("id")){
+
+						if($(this).attr("id").split("-")[1]){
+
+							if($(this).attr("id").split("-")[0] == "date"){
+
+								strJson += '"'+$(this).attr("id").split("-")[0]+'": "'+$(this).html().replace("R$ ","")+'", ';
+
+							}else{
+								strJson += '"'+$(this).attr("id").split("-")[0]+'":'+$(this).html().replace("R$ ","")+', ';
+							}
+
+						}
+					}
+				});
+
+				strJsonTotal = '{"client_id":'+$("#client_id").val()+', '+strJson.substring(0, strJson.length-2)+'}, ';
+
+				$('#form_modal').css('display','none');
+
+				$.ajax({
+		         	url : urlApi,
+		         	type : 'POST',
+		         	contentType: 'application/json',
+		         	dataType: 'json',
+		         	data: strJsonTotal.substring(0, strJsonTotal.length-2),
+
+		     		success: function(retorno){
+		     			
+		     			$("input").val("");
+
+		     			$("#alert_sucesso").fadeIn(500);
+		     			setTimeout(function(){
+		     				$("#alert_sucesso").fadeOut(500);
+		     				window.location.href="vendas.html";
+		     			}, 3000);
+
+		     		},
+		     		error: function(erro){
+		     			//popupErro(erro);
+		     		}
+		         
+				});
+
+
+			});
+
+		}
+
+
+		function getEdit(id){
+
+			$.ajax({
+	         	url : urlApi+"/"+id,
+	         	type : 'GET',
+	         	contentType: 'application/json',
+	     		success: function(retorno){
+
+	     			$("#client_id").html(
+	     				"<option value='"+retorno.data[0].client.id+"'>"+retorno.data[0].client.name+"</option>"
+	     			);
+
+     				$.each(retorno.data, function(){
+     					
+     					$("#lista_produtos").prepend(
+							'<div class="alert alert-dismissible alert-success" id="item">'+
+			  					'<button type="button" class="close btn" onclick="del(this, '+this.id+')">Excluir</button>'+
+			  					'<span id="product_id">'+this.product.id+'</span> - '+
+			  					'<strong>'+this.product.name+'</strong><br/>'+
+			  					'Quantidade: <span id="quantity">'+this.quantity+'</span><br/>'+
+			  					'Valor: R$ <span id="unit_price">'+this.unit_price+'</span><br/>'+
+			  					'Total: <span id="total">'+this.total+'</span><br/>'+
+			  					'Data: <span id="date">'+this.date+'</span>'+
+							'</div>'
+						);
+
+     				});
+	     			
+	     		},
+	     		error: function(erro){
+	     			popupErro(erro);
+	     		}
+	         
+			});
+
+		}
+
+		function del(este, id){
+
+			if(confirm("Deseja realmente excluir")){
+
+				$.ajax({
+		         	url : urlApi+"/"+id,
+		         	type : 'DELETE',
+		         	contentType: 'application/json',
+		     		success: function(retorno){
+		     			$(este).parent().remove();
+		     			$("#alert_sucesso").fadeIn(500);
+		     			setTimeout(function(){
+		     				$("#alert_sucesso").fadeOut(500);
+		     			}, 3000);
+		     		},
+		     		error: function(erro){
+		     			popupErro(erro);
+		     		}
+		         
+				});
+
+			}
+
+		}
+
+
+		function validaForm(){
+
+			var erro = false;
+			var strErro = "";
+
+			$("input").each(function(){
+
+				if($(this).hasClass("required") && $(this).val() == ""){
+					erro = true;
+					strErro += "O campo "+$(this).prev().html()+" é obrigatório!<br/>";
+				}
+
+			});
+
+			$("select").each(function(){
+
+				if($(this).hasClass("required") && $(this).val() == ""){
+					erro = true;
+					strErro += "O campo "+$(this).prev().html()+" é obrigatório!<br/>";
+				}
+
+			});
+
+
+			if(erro){
+				$(".title_validacao").html("Atenção!");
+				$(".text_validacao").html(strErro);
+				$("#erro_validacao").css("display","block");
+			}else{
+				$("#erro_validacao").css("display","none");
+			}
+
+			
+			return erro;
+
+		}
+
+
+		function popupErro(erro){
+			$(".title_erro").html("Erro: "+erro.status);
+			$(".text_erro").html(erro.statusText);
+			$("#erro_retorno").css("display","block");
+		}
+
+
+		function confirma(este){
+			if(confirm("Deseja realmente excluir este item?")){
+				$(este).parent().remove();
+			}
+		}
+
+	</script>
+</body>
+</html>
