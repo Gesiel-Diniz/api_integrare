@@ -20,6 +20,7 @@ Processo Seletivo Integrare: Laravel - Restfull<br>
     que seja executado em um servidor). <br>
 8 - Execute qualquer .html dentro da pasta "front" no browser, de preferência no Chrome.<br>
 
-OBS: Qualquer dúvida estou a disposição.<br><br><br>
+OBS: Qualquer dúvida estou a disposição.<br>
+     Meu Anti-virus entendeu o arquivo server.php como uma ameaça, e bloqueou, caso não execute veja na quarentena do seu ant-virus<br><br>
 
 Att: Gesiel Diniz da Silva
